@@ -1,0 +1,100 @@
+Basic config R1
+
+
+enable 
+configure terminal
+enable secret class
+service password-encryption
+no ip domain lookup
+security passwords min-length 8
+line con 0
+pass cisco
+login
+exec-timeout 10
+line vty 0 15
+pass cisco
+login
+exec-timeout 10
+
+
+# For R1
+enable
+configure terminal
+hostname R1
+interface G0/0
+ip address 100.52.10.1 255.255.255.0
+no shutdown
+
+interface S0/0/1
+ip address 100.52.1.1 255.255.255.252
+no shutdown
+
+interface Loopback10
+ip address 11.52.11.11 255.255.255.0
+no shutdown
+exit
+
+interface S0/0/1
+ip address 200.52.1.1 255.255.255.252
+no shutdown
+exit
+
+
+Step 2
+# For R1
+interface S0/0/1
+encapsulation ppp
+ppp authentication chap
+ppp quality 75 ]won't work
+exit
+username R2_DS5352 password cisco
+
+Step 3
+
+# For R1
+access-list 10 permit 100.52.10.0 0.0.0.255
+interface G0/0
+ip nat inside
+exit
+interface S0/0/1
+ip nat outside
+exit
+ip nat inside source list 10 interface S0/0/1 overload
+
+Step 4
+
+# For R1
+router ospf 10
+network 100.52.10.0 0.0.0.255 area 0
+network 100.52.1.0 0.0.0.3 area 0
+network 11.52.11.0 0.0.0.255 area 0
+exit
+
+
+Step 5
+
+# For R1
+interface Tunnel1
+ip address 192.168.52.1 255.255.255.252
+tunnel source S0/0/1
+tunnel destination 200.52.1.1  # Replace with R3 S0/0/1 IP
+exit
+
+router bgp 65210
+neighbor 192.168.52.2 remote-as 65220
+network 192.168.52.0 mask 255.255.255.252
+exit
+
+Step 6
+# For R1
+ip access-list extended ACCESS
+deny icmp any 100.52.10.0 0.0.0.255
+permit ip any any
+exit
+
+
+********************
+interface G0/0
+ip access-group ACCESS in				]won't work
+exit
+*****************

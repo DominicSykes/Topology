@@ -1,0 +1,110 @@
+**Addressing Table** (Replace xxx by last two-digit of your student number)
+
+| Devices | Ports | IP Address | Subnet mask | Default Gateway |
+| --- | --- | --- | --- | --- |
+| PC-A | Ethernet | 100.52.1.10 | 255.255.255.252 | 10.52.1.1 |
+| R1 | G0/0 | 100.52.10.1 | 255.255.255.0 |  |
+| R1 | S0/0/1 | 100.52.1.1 | 255.255.255.252 |  |
+| R1 | Lo 10 | 11.52.11.11 | 255.255.255.0 |  |
+| R2 | S0/0/0 (DCE) | 100.52.1.2 | 255.255.255.252 |  |
+| R2 | S0/0/1 | 200.52.1.2 | 255.255.255.252 |  |
+| PC-B | Ethernet | 10.52.2.10 | 255.255.255.0 | 10.52.2.1 |
+| R3 | S0/0/1 | 200.52.1.1 | 255.255.255.0 |  |
+| R3 | G0/0 | 200.52.2.1 | 255.255.255.0 |  |
+
+**Step1:  Copy and Paste the basic configurations given for all the three routers.**
+
+**Step 2: Set up PPP with CHAP**
+
+**For R1**
+
+S0/0/1
+
+- PPP w/ CHAP; Link quality as 75
+    - ppp authentication chap
+    - exit
+    - username R2_DS5352 password cisco
+- Local database for CHAP – username R2 use **cisco** as password
+
+**For R2**
+
+S0/0/0 - Appropriate configuration of PPP as relates to R1’s S0/0/1
+
+S0/0/1 - Appropriate configuration of PPP as relates to R3’s S0/0/0
+
+**R3**
+
+- PPP w/ CHAP; Link quality as 75
+- Local database for CHAP – username R2 use **cisco** as password
+
+**Step 3: Set up NAT using ACL**
+
+Use NAT on both R1 & R3 using the following specs:
+
+- Permit the networks to be translated on both that are attached to their G0/0 interface (use Standard ACL 10 for R1, Standard ACL 20 for R3)
+- The outside interface for R1 is S0/0/1
+- The outside interface for R3 is S0/0/0
+- Use PAT for translation on both using only a single address – the Serial interface of the outside interface
+
+**Step 4: Set up IP Routing**
+
+- Set up OSPF single area routing on all 3 routers with an AS number of 10
+- Make OSPF routing happen between all three routers and check the interconnectivity.
+
+**Step 5:  Set up GRE Tunnel with BGP Toronto & Oshawa**
+
+(Replace xx and 52 by last two-digit student number)
+
+**R1 tunnel 1 & eBGP**
+
+- Set up tunnel with IPv4 address 192.168.52.1/30
+- Set the host route to tunnel destination using exit interface
+- For BGP, use Autonomous Systems (AS) 65210 - Configure neighbour and network
+
+**R3 tunnel 1 & eBGP**
+
+- Set up tunnel with IPv4 address 192.168.52.2/30
+- Set the host route to tunnel destination using exit interface
+- For BGP, use AS 6xx20 – Configure neighbour and network
+
+**From PC-A, should be able to ping PC-B**; **From PC-B, should be able to ping PC-A**
+
+**Step 6: IP  ACLs**
+
+**R1 ACL specs**
+
+- Configure an IPv4 extended ACL named ACCESS so that no one can ping any device on R1 LAN
+- Everything else is allowed
+- Test by pinging from PC-B to PC-A (should NOT work); PC-B to Lo10 (Should work)
+- Ping PC-A to PC-B (**should** work)
+
+Create a folder on the desktop called **yourfirstnamefinal** and copy the necessary files mentioned below as per instruction, zip it and submit via DC Connect (**FinalLabExam** assignment folder)
+
+- Save final configurations as individual text or document for each router. (3 doc or txt or pdf)
+- Save a document as **verification.doc**(pdf),
+- Attach routing information for each router that shows all eBGP learned routes plus static route where applicable. (3 screenshots)
+- Attach NAT translations in the routers configured. (2 screenshots)
+- Attach access list information to prove your configurations (1 screenshots)
+- Attach successful ping from PC-A to PC-B and unsuccessful ping from PC-B to PC-A (2 screenshots)
+
+**Wish you all the best**
+
+Here's a detailed script for configuring the routers (R1, R2, and R3) according to your requirements. This script includes setting up PPP with CHAP, NAT using ACLs, OSPF routing, GRE Tunnel with BGP, and IP ACLs.
+
+### Verification and Documentation
+
+1. **Save Configurations**: Use `copy running-config startup-config` on each router to save configurations.
+2. **Verification Document**:
+    - **Routing Information**: `show ip route` on each router
+    - **NAT Translations**: `show ip nat translations`
+    - **ACL Information**: `show access-lists`
+    - **Ping Results**: Use `ping` commands to capture successful and unsuccessful pings.
+
+### Creating the Final Folder
+
+1. Create a folder named `yourfirstnamefinal`.
+2. Save configurations as `R1_config.txt`, `R2_config.txt`, and `R3_config.txt`.
+3. Create a document named `verification.doc` with screenshots and necessary verification details.
+4. Zip the folder and submit it as required.
+
+This script should cover the configurations mentioned in the video and fulfill the specified requirements. Make sure to replace placeholders with the actual IP addresses and interfaces based on your network setup.
